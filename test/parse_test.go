@@ -1,10 +1,11 @@
-package parser
+package tests
 
 import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
 	"sync"
+	"strings"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -41,18 +42,26 @@ type testResult struct {
 	Succeeded bool
 	Expected string
 	Actual string
+	Diff []string
 }
 
 func testParse(testNumber int) testResult {
+	expected, _ := ioutil.ReadFile(fmt.Sprintf("parse/test%02d.out", testNumber))
+	expected_ := string(expected)
+
 	input, _ := ioutil.ReadFile(fmt.Sprintf("parse/test%02d.vin", testNumber))
 	actual := bytes.Buffer{}
 	parser.Print(&actual, parse(string(input)))
-	expected, _ := ioutil.ReadFile(fmt.Sprintf("parse/test%02d.out", testNumber))
-
-	expected_ := string(expected)
 	actual_ := actual.String()
 
-	if expected_ == actual_ {
+	fmt.Println("Expected:", expected_)
+	fmt.Println("Actual:", actual_)
+	diff, textsEqual := Diff(
+		strings.Split(expected_, "\n"),
+		strings.Split(actual_, "\n"),
+	)
+
+	if textsEqual {
 		return testResult{
 			TestNumber: testNumber,
 			Succeeded: true,
@@ -63,6 +72,7 @@ func testParse(testNumber int) testResult {
 			Succeeded: false,
 			Expected: expected_,
 			Actual: actual_,
+			Diff: diff,
 		}
 	}
 }
@@ -87,13 +97,9 @@ func TestParse(t *testing.T) {
 			anyFailed = true
 			redPrintf("TEST %d: Failure\n", testNumber)
 
-			redPrintf("===== BEGIN Expected =====\n")
-			redPrintf("%s\n", result.Expected)
-			redPrintf("===== END Expected =====\n")
-
-			redPrintf("===== BEGIN Actual =====\n")
-			redPrintf("%s\n", result.Actual)
-			redPrintf("===== END Actual =====\n")
+			for _, line := range result.Diff {
+				fmt.Println(line)
+			}
 		}
 	}
 
