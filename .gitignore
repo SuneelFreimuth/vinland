@@ -1,1 +1,5 @@
 src/parser/.antlr
+src/parser/vinland_*
+src/parser/Vinland.interp
+src/parser/Vinland.tokens
+src/parser/VinlandLexer.*
