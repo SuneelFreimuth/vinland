@@ -6,6 +6,8 @@ type Node interface {
 }
 
 type Visitor interface {
+	VisitDeclarationList(declList *DeclarationList)
+	VisitFunctionDefinition(declList *FunctionDefinition)
 	VisitOperation(op *Operation) any
 	VisitNumber(n *Number) any
 	VisitCall(c *Call) any

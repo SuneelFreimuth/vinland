@@ -11,17 +11,20 @@ decl
   : functionDefinition
   ;
 
+Comment
+  : '#' ~[\r\n]* -> skip
+  ;
+
 stmtBlock: '{' stmtList '}';
 
-stmtList: stmt*;
+stmtList: (stmt ';')* expr0?;
 
 stmt
   : binding
-  | expr
-  | call
+  | expr0
   ;
 
-binding: Identifier '=' expr;
+binding: Identifier '=' expr0;
 
 functionDefinition: 'fn' Identifier '(' paramList ')' stmtBlock;
 
@@ -29,15 +32,52 @@ paramList: (param (',' param)*)?;
 
 param: Identifier;
 
-expr
-    : '(' expr ')'             # Parenthesized
-    | expr op=('+'|'-') expr   # AddSub
-    | expr op=('*'|'/') expr   # MulDiv
-    | call                     # CallExpr
-    | literal                  # Number
-    ;
+// Operators and expression precedence taken from Crux, a language for teaching 
+// compilers and interpreters by Prof. Brian Demsky, UC Irvine.
+op0
+  : '>='
+  | '<='
+  | '!='
+  | '=='
+  | '>'
+  | '<'
+  ;
+op1
+  : '+'
+  | '-'
+  | '||'
+  ;
+op2
+  : '*'
+  | '/'
+  | '&&'
+  ;
 
-call: Identifier expr+;
+expr0
+  : expr1
+  | ifExpr;
+expr1
+  : expr2 (op0 expr2)?
+  ;
+expr2
+  : expr3 op1 expr3
+  | expr3
+  ;
+expr3
+  : expr4
+  | expr3 op2 expr4
+  ;
+expr4
+  : '!' expr4
+  | '(' expr0 ')'
+  | name
+  | callExpr
+  | literal
+  ;
+
+name: Identifier;
+callExpr: Identifier expr0+;
+ifExpr: 'if' expr0 'then' expr0 'else' expr0;
 
 literal
   : IntLiteral
