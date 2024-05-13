@@ -50,6 +50,7 @@ op1
 op2
   : '*'
   | '/'
+  | '%'
   | '&&'
   ;
 
@@ -80,13 +81,13 @@ callExpr: Identifier expr0+;
 ifExpr: 'if' expr0 'then' expr0 'else' expr0;
 
 literal
-  : IntLiteral
+  : intLiteral
   | FloatLiteral
   | BooleanLiteral
   | StringLiteral
   ;
 
-IntLiteral
+intLiteral
   : DecimalNumber
   | HexadecimalNumber
   | BinaryNumber
