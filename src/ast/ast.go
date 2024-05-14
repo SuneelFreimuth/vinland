@@ -101,6 +101,9 @@ func (stmts *StatementList) Children() []Node {
 	for i, stmt := range stmts.Stmts {
 		children[i] = stmt
 	}
+	if stmts.FinalExpr != nil {
+		children = append(children, stmts.FinalExpr)
+	}
 	return children
 }
 
@@ -137,15 +140,11 @@ func (defn *FunctionDefinition) Accept(v Visitor) any {
 }
 
 func (defn *FunctionDefinition) Children() []Node {
-	children := make([]Node, len(defn.Body.Stmts))
-	for i, stmt := range defn.Body.Stmts {
-		children[i] = stmt
-	}
-	return children
+	return defn.Body.Children()
 }
 
 func (defn *FunctionDefinition) EnterNode(l Listener) {
-	
+	l.EnterFunctionDefinition(defn)
 }
 
 func (defn *FunctionDefinition) ExitNode(l Listener) {
@@ -307,7 +306,6 @@ func (ifExpr *IfExpression) ExitNode(l Listener) {
 }
 
 
-
 type OpExpr struct {
 	BaseNode
 	Operation Operation
@@ -417,8 +415,8 @@ func (expr *OpExpr) Children() []Node {
 	}
 }
 
-func (expr *OpExpr) ExitNode(l Listener) {
-	l.ExitOpExpr(expr)
+func (expr *OpExpr) EnterNode(l Listener) {
+	l.EnterOpExpr(expr)
 }
 
 func (expr *OpExpr) ExitNode(l Listener) {
@@ -451,6 +449,14 @@ func (call *CallExpr) Children() []Node {
 	return children
 }
 
+func (call *CallExpr) EnterNode(l Listener) {
+	l.EnterCallExpr(call)
+}
+
+func (call *CallExpr) ExitNode(l Listener) {
+	l.ExitCallExpr(call)
+}
+
 
 type NameAccess struct {
 	BaseNode
@@ -463,4 +469,12 @@ func NewNameAccess(name Symbol) *NameAccess {
 
 func (na *NameAccess) Accept(v Visitor) any {
 	return v.VisitNameAccess(na)
+}
+
+func (na *NameAccess) EnterNode(l Listener) {
+	l.EnterNameAccess(na)
+}
+
+func (na *NameAccess) ExitNode(l Listener) {
+	l.ExitNameAccess(na)
 }

@@ -3,6 +3,7 @@ package ast
 import (
 	// "strconv"
 
+	"fmt"
 	"strconv"
 
 	"github.com/SuneelFreimuth/vinland/src/parser"
@@ -59,6 +60,7 @@ func (b *Builder) VisitStmtList(ctx *parser.StmtListContext) any {
 
 	var finalExpr Expression
 	if expr0 := ctx.Expr0(); expr0 != nil {
+		fmt.Println("HAS FINAL EXPRESSION: ", expr0.GetText())
 		finalExpr = expr0.Accept(b).(Expression)
 	}
 
@@ -103,7 +105,7 @@ func (b *Builder) VisitFunctionDefinition(ctx *parser.FunctionDefinitionContext)
 
 func (b *Builder) VisitExpr0(ctx *parser.Expr0Context) any {
 	if expr1 := ctx.Expr1(); expr1 != nil {
-		return expr1.Accept(b).(Expression)
+		return expr1.Accept(b)
 	}
 	return ctx.IfExpr().Accept(b)
 }

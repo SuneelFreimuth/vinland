@@ -1,3 +1,3 @@
 package parser
 
-//go:generate .\generate.bat
+//go:generate ./generate.sh

@@ -2,8 +2,8 @@ package ast
 
 
 type Listener interface {
-	EnterEveryNode(*Node)
-	ExitEveryNode(*Node)
+	EnterEveryNode(Node)
+	ExitEveryNode(Node)
 	EnterDeclarationList(*DeclarationList)
 	ExitDeclarationList(*DeclarationList)
 	EnterStatementList(*StatementList)
@@ -33,8 +33,8 @@ type Listener interface {
 
 type NullListener struct {}
 
-func (l *NullListener) EnterEveryNode(*Node)
-func (l *NullListener) ExitEveryNode(*Node)
+func (l *NullListener) EnterEveryNode(Node) {}
+func (l *NullListener) ExitEveryNode(Node) {}
 func (l *NullListener) EnterDeclarationList(*DeclarationList) {}
 func (l *NullListener) ExitDeclarationList(*DeclarationList) {}
 func (l *NullListener) EnterStatementList(*StatementList) {}
