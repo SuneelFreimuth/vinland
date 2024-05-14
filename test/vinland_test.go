@@ -13,7 +13,10 @@ import (
 )
 
 const (
-	NumTests = 3
+	NumTests = map[string]int {
+		"parse": 3,
+		"ast": 3,
+	}
 	Reset = "\033[0m"
 	Red = "\033[0;31m"
 	Green = "\033[0;32m"

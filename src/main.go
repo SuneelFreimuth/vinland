@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"os"
 
@@ -19,6 +20,7 @@ func main() {
 	parser.Print(os.Stdout, parseTree)
 	syntaxTree := ast.Build(parseTree)
 	fmt.Println("========== BEGIN AST =========")
-	ast.Print(os.Stdout, syntaxTree)
+	encoded, _ := xml.MarshalIndent(syntaxTree, "", "  ")
+	fmt.Println(string(encoded))
 	fmt.Println("========== END AST =========")
 }
