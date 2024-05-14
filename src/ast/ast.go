@@ -8,6 +8,8 @@ import (
 type Node interface {
 	Accept(Visitor) any
 	Children() []Node
+	EnterNode(l Listener)
+	ExitNode(l Listener)
 }
 
 
@@ -43,6 +45,9 @@ func (bn *BaseNode) Children() []Node {
 	return nil
 }
 
+func (bn *BaseNode) EnterNode(l Listener) {}
+func (bn *BaseNode) ExitNode(l Listener) {}
+
 
 type DeclarationList struct {
 	BaseNode
@@ -63,6 +68,14 @@ func (dl *DeclarationList) Children() []Node {
 		children[i] = decl
 	}
 	return children
+}
+
+func (dl *DeclarationList) EnterNode(l Listener) {
+	l.EnterDeclarationList(dl)
+}
+
+func (dl *DeclarationList) ExitNode(l Listener) {
+	l.ExitDeclarationList(dl)
 }
 
 
@@ -89,6 +102,14 @@ func (stmts *StatementList) Children() []Node {
 		children[i] = stmt
 	}
 	return children
+}
+
+func (sl *StatementList) EnterNode(l Listener) {
+	l.EnterStatementList(sl)
+}
+
+func (sl *StatementList) ExitNode(l Listener) {
+	l.ExitStatementList(sl)
 }
 
 
@@ -123,6 +144,14 @@ func (defn *FunctionDefinition) Children() []Node {
 	return children
 }
 
+func (defn *FunctionDefinition) EnterNode(l Listener) {
+	
+}
+
+func (defn *FunctionDefinition) ExitNode(l Listener) {
+	l.ExitFunctionDefinition(defn)
+}
+
 
 type Binding struct {
 	BaseNode
@@ -145,6 +174,14 @@ func (b *Binding) Children() []Node {
 	return []Node{b.Name, b.Value}
 }
 
+func (b *Binding) EnterNode(l Listener) {
+	l.EnterBinding(b)
+}
+
+func (b *Binding) ExitNode(l Listener) {
+	l.ExitBinding(b)
+}
+
 
 type LiteralInt struct {
 	BaseNode
@@ -157,6 +194,14 @@ func NewLiteralInt(value int64) *LiteralInt {
 
 func (li *LiteralInt) Accept(v Visitor) any {
 	return v.VisitLiteralInt(li)
+}
+
+func (li *LiteralInt) EnterNode(l Listener) {
+	l.EnterLiteralInt(li)
+}
+
+func (li *LiteralInt) ExitNode(l Listener) {
+	l.ExitLiteralInt(li)
 }
 
 
@@ -173,6 +218,14 @@ func (lf *LiteralFloat) Accept(v Visitor) any {
 	return v.VisitLiteralFloat(lf)
 }
 
+func (lf *LiteralFloat) EnterNode(l Listener) {
+	l.EnterLiteralFloat(lf)
+}
+
+func (lf *LiteralFloat) ExitNode(l Listener) {
+	l.ExitLiteralFloat(lf)
+}
+
 
 type LiteralString struct {
 	BaseNode
@@ -187,6 +240,14 @@ func (ls *LiteralString) Accept(v Visitor) any {
 	return v.VisitLiteralString(ls)
 }
 
+func (ls *LiteralString) EnterNode(l Listener) {
+	l.EnterLiteralString(ls)
+}
+
+func (ls *LiteralString) ExitNode(l Listener) {
+	l.ExitLiteralString(ls)
+}
+
 
 type LiteralBool struct {
 	BaseNode
@@ -199,6 +260,14 @@ func NewLiteralBool(value bool) *LiteralBool {
 
 func (lb *LiteralBool) Accept(v Visitor) any {
 	return v.VisitLiteralBool(lb)
+}
+
+func (lb *LiteralBool) EnterNode(l Listener) {
+	l.EnterLiteralBool(lb)
+}
+
+func (lb *LiteralBool) ExitNode(l Listener) {
+	l.ExitLiteralBool(lb)
 }
 
 
@@ -228,6 +297,15 @@ func (ifExpr *IfExpression) Children() []Node {
 		ifExpr.ElseExpr,
 	}
 }
+
+func (ifExpr *IfExpression) EnterNode(l Listener) {
+	l.EnterIfExpression(ifExpr)
+}
+
+func (ifExpr *IfExpression) ExitNode(l Listener) {
+	l.ExitIfExpression(ifExpr)
+}
+
 
 
 type OpExpr struct {
@@ -337,6 +415,14 @@ func (expr *OpExpr) Children() []Node {
 		expr.Left,
 		expr.Right,
 	}
+}
+
+func (expr *OpExpr) ExitNode(l Listener) {
+	l.ExitOpExpr(expr)
+}
+
+func (expr *OpExpr) ExitNode(l Listener) {
+	l.ExitOpExpr(expr)
 }
 
 

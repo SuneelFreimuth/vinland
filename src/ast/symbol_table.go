@@ -11,7 +11,7 @@ type SymbolTable struct {
 }
 
 func NewSymbolTable() *SymbolTable {
-	table := &SymbolTable{}
+	table := &SymbolTable{Scopes: []Scope{{}}}
 	table.Put("print")
 	return table
 }

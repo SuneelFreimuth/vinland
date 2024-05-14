@@ -9,7 +9,7 @@ import (
 )
 
 func Build(start parser.IProgramContext) Node {
-	return start.Accept(&Builder{}).(Node)
+	return start.Accept(NewBuilder()).(Node)
 }
 
 
@@ -77,8 +77,10 @@ func (b *Builder) VisitStmt(ctx *parser.StmtContext) any {
 
 func (b *Builder) VisitBinding(ctx *parser.BindingContext) any {
 	location := ctx.Identifier().GetText()
+	symbol, _ := b.SymbolTable.Put(location)
+	name := NewNameAccess(symbol)
 	value := ctx.Expr0().Accept(b).(Expression);
-	return NewBinding(location, value)
+	return NewBinding(name, value)
 }
 
 func (b *Builder) VisitFunctionDefinition(ctx *parser.FunctionDefinitionContext) any {
@@ -194,6 +196,22 @@ func (b *Builder) VisitIntLiteral(ctx *parser.IntLiteralContext) any {
 	// Binary literal
 	n, _ := strconv.ParseInt(ctx.GetText()[2:], 2, 64)
 	return NewLiteralInt(n)
+}
+
+func (b *Builder) VisitCallExpr(ctx *parser.CallExprContext) any {
+	callee, exists := b.SymbolTable.Lookup(ctx.Identifier().GetText())
+	if !exists {
+		// Error: function is not defined
+		exists = exists
+	}
+
+	expr0s := ctx.AllExpr0()
+	args := make([]Expression, len(expr0s))
+	for i, expr0 := range expr0s {
+		args[i] = expr0.Accept(b).(Expression)
+	}
+
+	return NewCallExpr(callee, args)
 }
 
 
