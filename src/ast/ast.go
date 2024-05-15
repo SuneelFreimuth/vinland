@@ -1,37 +1,35 @@
 package ast
 
 import (
+	"encoding/xml"
+
 	"github.com/SuneelFreimuth/vinland/src/ast/types"
 )
 
-
 type Node interface {
+	xml.Marshaler
+
 	Accept(Visitor) any
 	Children() []Node
 	EnterNode(l Listener)
 	ExitNode(l Listener)
 }
 
-
 type StmtExpr interface {
 	Node
 }
-
 
 type Expression interface {
 	StmtExpr
 }
 
-
 type Statement interface {
 	StmtExpr
 }
 
-
 type Declaration interface {
 	Node
 }
-
 
 type BaseNode struct {
 	Type types.Type
@@ -46,8 +44,7 @@ func (bn *BaseNode) Children() []Node {
 }
 
 func (bn *BaseNode) EnterNode(l Listener) {}
-func (bn *BaseNode) ExitNode(l Listener) {}
-
+func (bn *BaseNode) ExitNode(l Listener)  {}
 
 type DeclarationList struct {
 	BaseNode
@@ -77,7 +74,6 @@ func (dl *DeclarationList) EnterNode(l Listener) {
 func (dl *DeclarationList) ExitNode(l Listener) {
 	l.ExitDeclarationList(dl)
 }
-
 
 type StatementList struct {
 	BaseNode
@@ -115,10 +111,9 @@ func (sl *StatementList) ExitNode(l Listener) {
 	l.ExitStatementList(sl)
 }
 
-
 type FunctionDefinition struct {
 	BaseNode
-	Function   Symbol
+	Name       Symbol
 	Parameters []Symbol
 	Body       *StatementList
 }
@@ -129,7 +124,7 @@ func NewFunctionDefinition(
 	body *StatementList,
 ) *FunctionDefinition {
 	return &FunctionDefinition{
-		Function:   function,
+		Name:       function,
 		Parameters: parameters,
 		Body:       body,
 	}
@@ -150,7 +145,6 @@ func (defn *FunctionDefinition) EnterNode(l Listener) {
 func (defn *FunctionDefinition) ExitNode(l Listener) {
 	l.ExitFunctionDefinition(defn)
 }
-
 
 type Binding struct {
 	BaseNode
@@ -181,7 +175,6 @@ func (b *Binding) ExitNode(l Listener) {
 	l.ExitBinding(b)
 }
 
-
 type LiteralInt struct {
 	BaseNode
 	Value int64
@@ -202,7 +195,6 @@ func (li *LiteralInt) EnterNode(l Listener) {
 func (li *LiteralInt) ExitNode(l Listener) {
 	l.ExitLiteralInt(li)
 }
-
 
 type LiteralFloat struct {
 	BaseNode
@@ -225,7 +217,6 @@ func (lf *LiteralFloat) ExitNode(l Listener) {
 	l.ExitLiteralFloat(lf)
 }
 
-
 type LiteralString struct {
 	BaseNode
 	Value string
@@ -247,7 +238,6 @@ func (ls *LiteralString) ExitNode(l Listener) {
 	l.ExitLiteralString(ls)
 }
 
-
 type LiteralBool struct {
 	BaseNode
 	Value bool
@@ -268,7 +258,6 @@ func (lb *LiteralBool) EnterNode(l Listener) {
 func (lb *LiteralBool) ExitNode(l Listener) {
 	l.ExitLiteralBool(lb)
 }
-
 
 type IfExpression struct {
 	BaseNode
@@ -304,7 +293,6 @@ func (ifExpr *IfExpression) EnterNode(l Listener) {
 func (ifExpr *IfExpression) ExitNode(l Listener) {
 	l.ExitIfExpression(ifExpr)
 }
-
 
 type OpExpr struct {
 	BaseNode
@@ -423,7 +411,6 @@ func (expr *OpExpr) ExitNode(l Listener) {
 	l.ExitOpExpr(expr)
 }
 
-
 type CallExpr struct {
 	BaseNode
 	Callee    Symbol
@@ -456,7 +443,6 @@ func (call *CallExpr) EnterNode(l Listener) {
 func (call *CallExpr) ExitNode(l Listener) {
 	l.ExitCallExpr(call)
 }
-
 
 type NameAccess struct {
 	BaseNode

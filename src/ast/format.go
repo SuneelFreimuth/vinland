@@ -5,11 +5,9 @@ import (
 	"io"
 )
 
-
 func Format(out io.Writer, ast Node) {
 	ast.Accept(&formatter{out: out})
 }
-
 
 type formatter struct {
 	NullVisitor
@@ -50,7 +48,7 @@ func (f *formatter) VisitBinding(b *Binding) any {
 }
 
 func (f *formatter) VisitFunctionDefinition(defn *FunctionDefinition) any {
-	fmt.Fprintf(f.out, "fn %s(", defn.Function.Name)
+	fmt.Fprintf(f.out, "fn %s(", defn.Name.Name)
 	if len(defn.Parameters) > 0 {
 		fmt.Fprint(f.out, defn.Parameters[0].Name)
 		for _, param := range defn.Parameters[1:] {

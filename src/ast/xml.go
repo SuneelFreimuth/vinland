@@ -5,68 +5,92 @@ import (
 )
 
 
-func (n *BaseNode) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	start_ := xml.StartElement{
-		Name: xml.Name{Local: "BaseNode"},
-		Attr: []xml.Attr{
-
-		},
-	}
+func (n BaseNode) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start_ := xml.StartElement{Name: xml.Name{Local: "BaseNode"}}
 	e.EncodeToken(start_)
 	for _, child := range n.Children() {
-		xml.Marshal(child)
+		e.Encode(child)
 	}
 	return nil
 }
 
-func (dl *DeclarationList) MarshalXML(e xml.Encoder, start xml.StartElement) error {
-	start_ := xml.StartElement{Name: xml.Name{Local: "Decls"}}
+func (dl DeclarationList) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start_ := xml.StartElement{Name: xml.Name{Local: "DeclarationList"}}
 	e.EncodeToken(start_)
-	// e.Encode(dl.Decls)
+	for _, decl := range dl.Decls {
+		e.Encode(decl)
+	}
 	e.EncodeToken(start_.End())
 	return nil
 }
 
-func (*StatementList) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (defn FunctionDefinition) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start_ := xml.StartElement{Name: xml.Name{Local: "FunctionDefinition"}}
+	e.EncodeToken(start_)
+
+	name := xml.StartElement{Name: xml.Name{Local: "Name"}}
+	e.EncodeToken(name)
+	e.Encode(defn.Name)
+	e.EncodeToken(name.End())
+	
+	params := xml.StartElement{Name: xml.Name{Local: "Parameters"}}
+	e.EncodeToken(params)
+	for _, param := range defn.Parameters {
+		e.Encode(param)
+	}
+	e.EncodeToken(params.End())
+
+	e.Encode(defn.Body.Stmts)
+	// body := xml.StartElement{Name: xml.Name{Local: "Body"}}
+	// e.EncodeToken(body)
+	// for _, stmt := range defn.Body.Children() {
+	// 	e.Encode(stmt)
+	// }
+	// e.EncodeToken(body.End())
+
+	e.EncodeToken(start_.End())
 	return nil
 }
 
-func (*Binding) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (sl StatementList) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	stmts := xml.StartElement{Name: xml.Name{Local: "StatementList"}}
+	e.EncodeToken(stmts)
+	e.EncodeToken(stmts.End())
 	return nil
 }
 
-func (*FunctionDefinition) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (b Binding) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*CallExpr) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (call CallExpr) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*OpExpr) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (expr OpExpr) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*IfExpression) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (ifExpr IfExpression) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*NameAccess) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (na NameAccess) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*LiteralInt) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (li LiteralInt) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*LiteralFloat) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (lf LiteralFloat) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*LiteralString) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (ls LiteralString) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (*LiteralBool) MarshalXML(e xml.Encoder, start xml.StartElement) error {
+func (lb LiteralBool) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }

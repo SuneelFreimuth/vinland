@@ -6,11 +6,9 @@ import (
 	"strings"
 )
 
-
 func Print(out io.Writer, ast Node) {
 	Walk(ast, &printer{out: out, depth: -1})
 }
-
 
 type printer struct {
 	NullListener
@@ -63,7 +61,7 @@ func (p *printer) ExitBinding(b *Binding) {
 }
 
 func (p *printer) EnterFunctionDefinition(defn *FunctionDefinition) {
-	p.printf("FunctionDefinition(%s, (", defn.Function.Name)
+	p.printf("FunctionDefinition(%s, (", defn.Name.Name)
 	if len(defn.Parameters) > 0 {
 		p.print(defn.Parameters[0].Name)
 		for _, param := range defn.Parameters[1:] {

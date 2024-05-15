@@ -18,7 +18,8 @@ func main() {
 	}
 	parseTree := parser.Parse(string(input))
 	parser.Print(os.Stdout, parseTree)
-	syntaxTree := ast.Build(parseTree)
+	var syntaxTree xml.Marshaler
+	syntaxTree = ast.Build(parseTree)
 	fmt.Println("========== BEGIN AST =========")
 	encoded, _ := xml.MarshalIndent(syntaxTree, "", "  ")
 	fmt.Println(string(encoded))
