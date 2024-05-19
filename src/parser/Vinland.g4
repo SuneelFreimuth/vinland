@@ -3,24 +3,19 @@ grammar Vinland;
 Whitespace: [ \r\n\t]+ -> skip;
 Identifier: [A-Za-z][A-Za-z0-9]*;
 
-program: declList EOF;
-
-declList: decl*;
-
-decl
-  : functionDefinition
-  ;
+program: stmtList EOF;
 
 Comment
   : '#' ~[\r\n]* -> skip
   ;
 
-stmtBlock: '{' stmtList '}';
+block: '{' stmtList '}';
 
 stmtList: (stmt ';')* expr0?;
 
 stmt
   : binding
+  | functionDefinition
   | expr0
   ;
 
@@ -56,7 +51,9 @@ op2
 
 expr0
   : expr1
-  | ifExpr;
+  | ifExpr
+  | block
+  ;
 expr1
   : expr2 (op0 expr2)?
   ;
