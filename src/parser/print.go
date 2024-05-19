@@ -8,24 +8,10 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-func Parse(expr string) (IProgramContext, SyntaxError) {
-	is := antlr.NewInputStream(expr)
 
-	// Create the Lexer
-	lexer := NewVinlandLexer(is)
-	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
-	p := NewVinlandParser(stream)
-
-	return p.Program(), nil
-}
-
-
-type SyntaxError interface{}
-
-
-func Print(out io.Writer, program IProgramContext) {
+func Print(out io.Writer, rule antlr.ParserRuleContext) {
 	p := newPrinter(out)
-	antlr.ParseTreeWalkerDefault.Walk(p, program)
+	antlr.ParseTreeWalkerDefault.Walk(p, rule)
 }
 
 type printer struct {
