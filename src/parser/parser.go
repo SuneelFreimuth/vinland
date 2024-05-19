@@ -11,6 +11,3 @@ func NewParser(expr string) *VinlandParser {
 	p := NewVinlandParser(stream)
 	return p
 }
-
-
-type SyntaxError interface{}
