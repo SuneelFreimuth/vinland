@@ -52,12 +52,12 @@ func (p *printer) ExitDeclarationList(declList *DeclarationList) {
 }
 
 func (p *printer) EnterBinding(b *Binding) {
-	p.print("Binding(")
+	p.println("Binding(")
 }
 
 func (p *printer) ExitBinding(b *Binding) {
 	p.indent()
-	p.print(")")
+	p.println(")")
 }
 
 func (p *printer) EnterFunctionDefinition(defn *FunctionDefinition) {
