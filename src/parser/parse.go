@@ -8,7 +8,7 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-func Parse(expr string) IProgramContext {
+func Parse(expr string) (IProgramContext, SyntaxError) {
 	is := antlr.NewInputStream(expr)
 
 	// Create the Lexer
@@ -16,8 +16,12 @@ func Parse(expr string) IProgramContext {
 	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 	p := NewVinlandParser(stream)
 
-	return p.Program()
+	return p.Program(), nil
 }
+
+
+type SyntaxError interface{}
+
 
 func Print(out io.Writer, program IProgramContext) {
 	p := newPrinter(out)
