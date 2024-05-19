@@ -8,63 +8,33 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/SuneelFreimuth/vinland/src/ast"
 	"github.com/SuneelFreimuth/vinland/src/parser"
 	"github.com/antlr4-go/antlr/v4"
 )
 
 const (
-	NumParseTests = 3
-	NumASTTests = 3
-	Reset = "\033[0m"
-	Red = "\033[0;31m"
-	Green = "\033[0;32m"
+	NumTests = 3
+	Reset    = "\033[0m"
+	Red      = "\033[0;31m"
+	Green    = "\033[0;32m"
 )
-
-func testParse(testNumber int) testResult {
-	expected, _ := os.ReadFile(fmt.Sprintf("parse/test%02d.out", testNumber))
-	expected_ := string(expected)
-
-	input, _ := os.ReadFile(fmt.Sprintf("parse/test%02d.vin", testNumber))
-	actual := bytes.Buffer{}
-	parser.Print(&actual, parse(string(input)))
-	actual_ := actual.String()
-
-	diff, textsEqual := Diff(
-		strings.Split(expected_, "\n"),
-		strings.Split(actual_, "\n"),
-	)
-
-	if textsEqual {
-		return testResult{
-			TestNumber: testNumber,
-			Succeeded: true,
-		}
-	} else {
-		return testResult{
-			TestNumber: testNumber,
-			Succeeded: false,
-			Expected: expected_,
-			Actual: actual_,
-			Diff: diff,
-		}
-	}
-}
 
 func TestAllStages(t *testing.T) {
 	newTestRunner().RunAllStages(t)
 }
 
-
 type testRunner struct {
-	numParseTests int
-	numASTTests int
+	numTests   int
+	parseTrees []parser.IProgramContext
+	asts       []ast.Node
 }
-
 
 func newTestRunner() *testRunner {
 	return &testRunner{
-		numParseTests: NumParseTests,
-		numASTTests: NumASTTests,
+		numTests:   NumTests,
+		parseTrees: make([]parser.IProgramContext, NumTests),
+		asts:       make([]ast.Node, NumTests),
 	}
 }
 
@@ -74,12 +44,12 @@ func (tr *testRunner) RunAllStages(t *testing.T) {
 }
 
 func (tr *testRunner) TestParse(t *testing.T) {
-	results := make([]testResult, tr.numParseTests)
+	results := make([]testResult, tr.numTests)
 	wg := sync.WaitGroup{}
-	for i := 0; i < tr.numParseTests; i++ {
+	for i := 0; i < tr.numTests; i++ {
 		wg.Add(1)
 		go func(testNumber int, results []testResult) {
-			results[testNumber] = testParse(testNumber)
+			results[testNumber] = tr.testParse(testNumber)
 			wg.Done()
 		}(i, results)
 	}
@@ -92,16 +62,9 @@ func (tr *testRunner) TestParse(t *testing.T) {
 		} else {
 			anyFailed = true
 			redPrintf("TEST %d: Failure\n", testNumber)
-
-			fmt.Println("======= BEGIN EXPECTED =========")
-			fmt.Println(result.Expected)
-			fmt.Println("======= END EXPECTED =========")
-			fmt.Println("======= BEGIN ACTUAL =========")
-			fmt.Println(result.Actual)
-			fmt.Println("======= END ACTUAL =========")
-			// for _, line := range result.Diff {
-			// 	fmt.Println(line)
-			// }
+			for _, line := range result.Diff {
+				fmt.Println(line)
+			}
 		}
 	}
 
@@ -110,17 +73,105 @@ func (tr *testRunner) TestParse(t *testing.T) {
 	}
 }
 
-func (tr *testRunner) TestASTBuild(*testing.T) {}
+func (tr *testRunner) testParse(testNumber int) testResult {
+	expected, _ := os.ReadFile(fmt.Sprintf("parse/test%02d.out", testNumber))
+	expected_ := string(expected)
 
+	input, _ := os.ReadFile(fmt.Sprintf("parse/test%02d.vin", testNumber))
+	tr.parseTrees[testNumber] = parse(string(input))
+
+	actual := bytes.Buffer{}
+	parser.Print(&actual, tr.parseTrees[testNumber])
+	actual_ := actual.String()
+
+	diff, textsEqual := Diff(
+		strings.Split(expected_, "\n"),
+		strings.Split(actual_, "\n"),
+	)
+
+	if textsEqual {
+		return testResult{
+			TestNumber: testNumber,
+			Succeeded:  true,
+		}
+	} else {
+		return testResult{
+			TestNumber: testNumber,
+			Succeeded:  false,
+			Expected:   expected_,
+			Actual:     actual_,
+			Diff:       diff,
+		}
+	}
+}
+
+func (tr *testRunner) TestASTBuild(t *testing.T) {
+	results := make([]testResult, tr.numTests)
+	wg := sync.WaitGroup{}
+	for i := 0; i < tr.numTests; i++ {
+		wg.Add(1)
+		go func(testNumber int, results []testResult) {
+			results[testNumber] = tr.testASTBuild(testNumber)
+			wg.Done()
+		}(i, results)
+	}
+	wg.Wait()
+
+	anyFailed := false
+	for testNumber, result := range results {
+		if result.Succeeded {
+			greenPrintf("TEST %d: Success\n", testNumber)
+		} else {
+			anyFailed = true
+			redPrintf("TEST %d: Failure\n", testNumber)
+			for _, line := range result.Diff {
+				fmt.Println(line)
+			}
+		}
+	}
+
+	if anyFailed {
+		t.Fail()
+	}
+}
+
+func (tr *testRunner) testASTBuild(testNumber int) testResult {
+	expected, _ := os.ReadFile(fmt.Sprintf("ast/test%02d.out", testNumber))
+	expected_ := string(expected)
+
+	tr.asts[testNumber] = ast.Build(tr.parseTrees[testNumber])
+	actual := bytes.Buffer{}
+	ast.Print(&actual, tr.asts[testNumber])
+	actual_ := actual.String()
+
+	diff, textsEqual := Diff(
+		strings.Split(expected_, "\n"),
+		strings.Split(actual_, "\n"),
+	)
+
+	if textsEqual {
+		return testResult{
+			TestNumber: testNumber,
+			Succeeded:  true,
+		}
+	} else {
+		return testResult{
+			TestNumber: testNumber,
+			Succeeded:  false,
+			Expected:   expected_,
+			Actual:     actual_,
+			Diff:       diff,
+		}
+	}
+}
 
 type testResult struct {
 	TestNumber int
-	Succeeded bool
-	Expected string
-	Actual string
-	Diff []string
+	Succeeded  bool
+	Expected   string
+	Actual     string
+	Diff       []string
 }
-
 
 func greenPrintf(format string, args ...any) {
 	greenFormat := Green + format + Reset

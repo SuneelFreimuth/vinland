@@ -1,5 +1,16 @@
-func main() {
-    a = 1
-    b = 2
-    c = 3
+DeclarationList {
+  FunctionDefinition(main, ()) {
+    Binding(
+      NameAccess(a)
+      LiteralInt(1)
+    )
+    Binding(
+      NameAccess(b)
+      LiteralInt(2)
+    )
+    Binding(
+      NameAccess(c)
+      LiteralInt(3)
+    )
+  }
 }
