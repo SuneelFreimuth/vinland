@@ -1,10 +1,8 @@
 package ast
 
-
 func Walk(ast Node, l Listener) {
 	(&walker{}).walk(ast, l)
 }
-
 
 type walker struct{}
 

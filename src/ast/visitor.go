@@ -15,7 +15,7 @@ type Visitor interface {
 	VisitLiteralBool(*LiteralBool) any
 }
 
-type NullVisitor struct {}
+type NullVisitor struct{}
 
 func (v *NullVisitor) VisitStatementList(*StatementList) any {
 	return nil

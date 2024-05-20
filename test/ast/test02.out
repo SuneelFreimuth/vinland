@@ -1,5 +1,5 @@
 FunctionDefinition(fib, (n)) {
-  IfExpression(
+  yield IfExpression(
     OpExpr(<
       NameAccess(n)
       LiteralInt(1)

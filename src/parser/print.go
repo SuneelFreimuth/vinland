@@ -8,7 +8,6 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-
 func Print(out io.Writer, rule antlr.ParserRuleContext) {
 	p := newPrinter(out)
 	antlr.ParseTreeWalkerDefault.Walk(p, rule)
@@ -17,7 +16,7 @@ func Print(out io.Writer, rule antlr.ParserRuleContext) {
 type printer struct {
 	*BaseVinlandListener
 
-	out io.Writer
+	out   io.Writer
 	depth int
 }
 

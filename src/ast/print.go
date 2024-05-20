@@ -7,14 +7,19 @@ import (
 )
 
 func Print(out io.Writer, ast Node) {
-	// -2 = -1 for StatementList + -1 for Statement
-	Walk(ast, &printer{out: out, depth: -1})
+	p := printer{
+		out:       out,
+		depth:     0,
+		yieldNext: false,
+	}
+	ast.Accept(&p)
 }
 
 type printer struct {
-	NullListener
-	out   io.Writer
-	depth int
+	NullVisitor
+	out       io.Writer
+	depth     int
+	yieldNext bool
 }
 
 func (p *printer) print(a ...any) {
@@ -32,27 +37,59 @@ func (p *printer) printf(format string, a ...any) {
 
 func (p *printer) indent() {
 	p.print(strings.Repeat("  ", p.depth))
+	if p.yieldNext {
+		p.print("yield ")
+		p.yieldNext = false
+	}
 }
 
-func (p *printer) EnterEveryNode(_ Node) {
-	p.depth += 1
+func (p *printer) VisitStatementList(stmtList *StatementList) any {
+	for _, stmt := range stmtList.Stmts {
+		stmt.Accept(p)
+	}
+	return nil
+}
+
+func (p *printer) VisitBlock(b *Block) any {
 	p.indent()
-}
+	p.println("Block {")
+	p.depth += 1
 
-func (p *printer) ExitEveryNode(_ Node) {
+	p.visitBlockInternal(b)
+
 	p.depth -= 1
+	p.indent()
+	p.println("}")
+
+	return nil
 }
 
-func (p *printer) EnterBinding(b *Binding) {
+func (p *printer) visitBlockInternal(b *Block) {
+	for _, stmt := range b.StatementList.Stmts {
+		stmt.Accept(p)
+	}
+	if b.Yields() {
+		p.yieldNext = true
+		b.FinalExpr.Accept(p)
+	}
+}
+
+func (p *printer) VisitBinding(b *Binding) any {
+	p.indent()
 	p.println("Binding(")
-}
+	p.depth += 1
 
-func (p *printer) ExitBinding(b *Binding) {
+	b.Name.Accept(p)
+	b.Value.Accept(p)
+
+	p.depth -= 1
 	p.indent()
 	p.println(")")
+	return nil
 }
 
-func (p *printer) EnterFunctionDefinition(defn *FunctionDefinition) {
+func (p *printer) VisitFunctionDefinition(defn *FunctionDefinition) any {
+	p.indent()
 	p.printf("FunctionDefinition(%s, (", defn.Name.Name)
 	if len(defn.Parameters) > 0 {
 		p.print(defn.Parameters[0].Name)
@@ -61,56 +98,90 @@ func (p *printer) EnterFunctionDefinition(defn *FunctionDefinition) {
 		}
 	}
 	p.println(")) {")
-}
+	p.depth += 1
 
-func (p *printer) ExitFunctionDefinition(defn *FunctionDefinition) {
+	p.visitBlockInternal(defn.Body)
+
+	p.depth -= 1
 	p.indent()
 	p.println("}")
+
+	return nil
 }
 
-func (p *printer) EnterCallExpr(call *CallExpr) {
+func (p *printer) VisitCallExpr(call *CallExpr) any {
+	p.indent()
 	p.printf("Call(%s\n", call.Callee.Name)
-}
+	p.depth += 1
 
-func (p *printer) ExitCallExpr(call *CallExpr) {
+	for _, arg := range call.Arguments {
+		arg.Accept(p)
+	}
+
+	p.depth -= 1
 	p.indent()
 	p.println(")")
+
+	return nil
 }
 
-func (p *printer) EnterOpExpr(op *OpExpr) {
+func (p *printer) VisitOpExpr(op *OpExpr) any {
+	p.indent()
 	p.printf("OpExpr(%s\n", op.Operation.String())
-}
+	p.depth += 1
 
-func (p *printer) ExitOpExpr(op *OpExpr) {
+	op.Left.Accept(p)
+	op.Right.Accept(p)
+
+	p.depth -= 1
 	p.indent()
 	p.println(")")
+
+	return nil
 }
 
-func (p *printer) EnterIfExpression(ifExpr *IfExpression) {
+func (p *printer) VisitIfExpression(ifExpr *IfExpression) any {
+	p.indent()
 	p.println("IfExpression(")
-}
+	p.depth += 1
 
-func (p *printer) ExitIfExpression(ifExpr *IfExpression) {
+	ifExpr.Condition.Accept(p)
+	ifExpr.ThenExpr.Accept(p)
+	ifExpr.ElseExpr.Accept(p)
+
+	p.depth -= 1
 	p.indent()
 	p.println(")")
+
+	return nil
 }
 
-func (p *printer) EnterNameAccess(access *NameAccess) {
+func (p *printer) VisitNameAccess(access *NameAccess) any {
+	p.indent()
 	p.printf("NameAccess(%s)\n", access.Name.Name)
+	return nil
 }
 
-func (p *printer) EnterLiteralInt(n *LiteralInt) {
+func (p *printer) VisitLiteralInt(n *LiteralInt) any {
+	p.indent()
 	p.printf("LiteralInt(%d)\n", n.Value)
+	return nil
 }
 
-func (p *printer) EnterLiteralFloat(n *LiteralFloat) {
+func (p *printer) VisitLiteralFloat(n *LiteralFloat) any {
+	p.indent()
 	p.printf("LiteralFloat(%f)\n", n.Value)
+	return nil
 }
 
-func (p *printer) EnterLiteralString(s *LiteralString) {
+func (p *printer) VisitLiteralString(s *LiteralString) any {
+	p.indent()
 	p.printf("LiteralString(%s)\n", s.Value)
+	return nil
 }
 
-func (p *printer) EnterLiteralBool(b *LiteralBool) {
+func (p *printer) VisitLiteralBool(b *LiteralBool) any {
+	p.indent()
 	p.printf("LiteralBool(%v)\n", b.Value)
+	return nil
 }

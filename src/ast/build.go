@@ -10,7 +10,6 @@ func Build(start parser.IProgramContext) Node {
 	return start.Accept(NewBuilder()).(Node)
 }
 
-
 type Builder struct {
 	*parser.BaseVinlandVisitor
 
@@ -22,7 +21,6 @@ func NewBuilder() *Builder {
 		SymbolTable: NewSymbolTable(),
 	}
 }
-
 
 func (b *Builder) VisitProgram(ctx *parser.ProgramContext) any {
 	return ctx.StmtList().Accept(b)
@@ -63,7 +61,7 @@ func (b *Builder) VisitBinding(ctx *parser.BindingContext) any {
 	location := ctx.Identifier().GetText()
 	symbol, _ := b.SymbolTable.Put(location)
 	name := NewNameAccess(symbol)
-	value := ctx.Expr0().Accept(b).(Expression);
+	value := ctx.Expr0().Accept(b).(Expression)
 	return NewBinding(name, value)
 }
 
@@ -174,7 +172,7 @@ func (b *Builder) VisitLiteral(ctx *parser.LiteralContext) any {
 		return NewLiteralBool(l.GetText() == "true")
 	}
 	s := ctx.StringLiteral().GetText()
-	return NewLiteralString(s[1:len(s)-1])
+	return NewLiteralString(s[1 : len(s)-1])
 }
 
 func (b *Builder) VisitIntLiteral(ctx *parser.IntLiteralContext) any {

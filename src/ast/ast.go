@@ -15,7 +15,6 @@ type Node interface {
 	ExitNode(l Listener)
 }
 
-
 type Expression interface {
 	Statement
 }
@@ -27,7 +26,6 @@ type Statement interface {
 type Declaration interface {
 	Node
 }
-
 
 type BaseNode struct {
 	Type types.Type
@@ -44,17 +42,16 @@ func (bn *BaseNode) Children() []Node {
 func (bn *BaseNode) EnterNode(l Listener) {}
 func (bn *BaseNode) ExitNode(l Listener)  {}
 
-
 type Block struct {
 	BaseNode
 	StatementList *StatementList
-	FinalExpr Expression
+	FinalExpr     Expression
 }
 
 func NewBlock(stmtList *StatementList, finalExpr Expression) *Block {
 	return &Block{
 		StatementList: stmtList,
-		FinalExpr: finalExpr,
+		FinalExpr:     finalExpr,
 	}
 }
 
@@ -78,10 +75,13 @@ func (b *Block) ExitNode(l Listener) {
 	l.ExitBlock(b)
 }
 
+func (b *Block) Yields() bool {
+	return b.FinalExpr != nil
+}
 
 type StatementList struct {
 	BaseNode
-	Stmts     []Statement
+	Stmts []Statement
 }
 
 func NewStatementList(stmts []Statement) *StatementList {
@@ -107,7 +107,6 @@ func (sl *StatementList) EnterNode(l Listener) {
 func (sl *StatementList) ExitNode(l Listener) {
 	l.ExitStatementList(sl)
 }
-
 
 type FunctionDefinition struct {
 	BaseNode
@@ -144,7 +143,6 @@ func (defn *FunctionDefinition) ExitNode(l Listener) {
 	l.ExitFunctionDefinition(defn)
 }
 
-
 type Binding struct {
 	BaseNode
 	Name  Expression
@@ -174,7 +172,6 @@ func (b *Binding) ExitNode(l Listener) {
 	l.ExitBinding(b)
 }
 
-
 type LiteralInt struct {
 	BaseNode
 	Value int64
@@ -195,7 +192,6 @@ func (li *LiteralInt) EnterNode(l Listener) {
 func (li *LiteralInt) ExitNode(l Listener) {
 	l.ExitLiteralInt(li)
 }
-
 
 type LiteralFloat struct {
 	BaseNode
@@ -218,7 +214,6 @@ func (lf *LiteralFloat) ExitNode(l Listener) {
 	l.ExitLiteralFloat(lf)
 }
 
-
 type LiteralString struct {
 	BaseNode
 	Value string
@@ -240,7 +235,6 @@ func (ls *LiteralString) ExitNode(l Listener) {
 	l.ExitLiteralString(ls)
 }
 
-
 type LiteralBool struct {
 	BaseNode
 	Value bool
@@ -261,7 +255,6 @@ func (lb *LiteralBool) EnterNode(l Listener) {
 func (lb *LiteralBool) ExitNode(l Listener) {
 	l.ExitLiteralBool(lb)
 }
-
 
 type IfExpression struct {
 	BaseNode
@@ -297,7 +290,6 @@ func (ifExpr *IfExpression) EnterNode(l Listener) {
 func (ifExpr *IfExpression) ExitNode(l Listener) {
 	l.ExitIfExpression(ifExpr)
 }
-
 
 type OpExpr struct {
 	BaseNode
@@ -416,7 +408,6 @@ func (expr *OpExpr) ExitNode(l Listener) {
 	l.ExitOpExpr(expr)
 }
 
-
 type CallExpr struct {
 	BaseNode
 	Callee    Symbol
@@ -449,7 +440,6 @@ func (call *CallExpr) EnterNode(l Listener) {
 func (call *CallExpr) ExitNode(l Listener) {
 	l.ExitCallExpr(call)
 }
-
 
 type NameAccess struct {
 	BaseNode

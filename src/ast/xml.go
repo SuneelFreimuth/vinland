@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 )
 
-
 func (n BaseNode) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start_ := xml.StartElement{Name: xml.Name{Local: "BaseNode"}}
 	e.EncodeToken(start_)
@@ -22,7 +21,7 @@ func (defn FunctionDefinition) MarshalXML(e *xml.Encoder, start xml.StartElement
 	e.EncodeToken(name)
 	e.Encode(defn.Name)
 	e.EncodeToken(name.End())
-	
+
 	params := xml.StartElement{Name: xml.Name{Local: "Parameters"}}
 	e.EncodeToken(params)
 	for _, param := range defn.Parameters {

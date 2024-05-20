@@ -50,9 +50,7 @@ func (st *SymbolTable) Lookup(name string) (s Symbol, exists bool) {
 	return
 }
 
-
 type Scope map[string]Symbol
-
 
 type Symbol struct {
 	Name  string
