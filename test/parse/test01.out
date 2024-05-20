@@ -1,9 +1,9 @@
 program
-  declList
-    decl
+  stmtList
+    stmt
       functionDefinition
         paramList
-        stmtBlock
+        block
           stmtList
             stmt
               binding

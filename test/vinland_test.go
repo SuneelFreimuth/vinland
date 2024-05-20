@@ -44,6 +44,7 @@ func (tr *testRunner) RunAllStages(t *testing.T) {
 }
 
 func (tr *testRunner) TestParse(t *testing.T) {
+	fmt.Println("====== TEST PARSE ======")
 	results := make([]testResult, tr.numTests)
 	wg := sync.WaitGroup{}
 	for i := 0; i < tr.numTests; i++ {
@@ -71,6 +72,7 @@ func (tr *testRunner) TestParse(t *testing.T) {
 	if anyFailed {
 		t.Fail()
 	}
+	fmt.Println()
 }
 
 func (tr *testRunner) testParse(testNumber int) testResult {
@@ -106,6 +108,7 @@ func (tr *testRunner) testParse(testNumber int) testResult {
 }
 
 func (tr *testRunner) TestASTBuild(t *testing.T) {
+	fmt.Println("====== TEST AST ======")
 	results := make([]testResult, tr.numTests)
 	wg := sync.WaitGroup{}
 	for i := 0; i < tr.numTests; i++ {
@@ -133,6 +136,7 @@ func (tr *testRunner) TestASTBuild(t *testing.T) {
 	if anyFailed {
 		t.Fail()
 	}
+	fmt.Println()
 }
 
 func (tr *testRunner) testASTBuild(testNumber int) testResult {

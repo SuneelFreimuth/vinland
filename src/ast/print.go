@@ -7,6 +7,7 @@ import (
 )
 
 func Print(out io.Writer, ast Node) {
+	// -2 = -1 for StatementList + -1 for Statement
 	Walk(ast, &printer{out: out, depth: -1})
 }
 
@@ -40,15 +41,6 @@ func (p *printer) EnterEveryNode(_ Node) {
 
 func (p *printer) ExitEveryNode(_ Node) {
 	p.depth -= 1
-}
-
-func (p *printer) EnterDeclarationList(declList *DeclarationList) {
-	p.println("DeclarationList {")
-}
-
-func (p *printer) ExitDeclarationList(declList *DeclarationList) {
-	p.indent()
-	p.println("}")
 }
 
 func (p *printer) EnterBinding(b *Binding) {

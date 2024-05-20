@@ -46,16 +46,8 @@ func (p *printer) EnterProgram(ctx *ProgramContext) {
 	p.print("program")
 }
 
-func (p *printer) EnterDeclList(ctx *DeclListContext) {
-	p.print("declList")
-}
-
-func (p *printer) EnterDecl(ctx *DeclContext) {
-	p.print("decl")
-}
-
-func (p *printer) EnterStmtBlock(ctx *StmtBlockContext) {
-	p.print("stmtBlock")
+func (p *printer) EnterBlock(ctx *BlockContext) {
+	p.print("block")
 }
 
 func (p *printer) EnterStmtList(ctx *StmtListContext) {

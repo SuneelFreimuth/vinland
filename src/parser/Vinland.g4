@@ -9,19 +9,19 @@ Comment
   : '#' ~[\r\n]* -> skip
   ;
 
-block: '{' stmtList '}';
+block: '{' stmtList expr0? '}';
 
-stmtList: (stmt ';')* expr0?;
+stmtList: (stmt)*;
 
 stmt
-  : binding
+  : binding ';'
   | functionDefinition
-  | expr0
+  | expr0 ';'
   ;
 
 binding: Identifier '=' expr0;
 
-functionDefinition: 'fn' Identifier '(' paramList ')' stmtBlock;
+functionDefinition: 'fn' Identifier '(' paramList ')' block;
 
 paramList: (param (',' param)*)?;
 

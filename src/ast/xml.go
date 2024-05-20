@@ -14,16 +14,6 @@ func (n BaseNode) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-func (dl DeclarationList) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	start_ := xml.StartElement{Name: xml.Name{Local: "DeclarationList"}}
-	e.EncodeToken(start_)
-	for _, decl := range dl.Decls {
-		e.Encode(decl)
-	}
-	e.EncodeToken(start_.End())
-	return nil
-}
-
 func (defn FunctionDefinition) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start_ := xml.StartElement{Name: xml.Name{Local: "FunctionDefinition"}}
 	e.EncodeToken(start_)
@@ -40,7 +30,7 @@ func (defn FunctionDefinition) MarshalXML(e *xml.Encoder, start xml.StartElement
 	}
 	e.EncodeToken(params.End())
 
-	e.Encode(defn.Body.Stmts)
+	e.Encode(defn.Body.StatementList)
 	// body := xml.StartElement{Name: xml.Name{Local: "Body"}}
 	// e.EncodeToken(body)
 	// for _, stmt := range defn.Body.Children() {

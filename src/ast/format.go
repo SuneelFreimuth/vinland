@@ -14,26 +14,12 @@ type formatter struct {
 	out io.Writer
 }
 
-func (f *formatter) VisitDeclarationList(declList *DeclarationList) any {
-	if len(declList.Decls) > 0 {
-		declList.Decls[0].Accept(f)
-		for _, decl := range declList.Decls[1:] {
-			fmt.Fprint(f.out, "\n")
-			decl.Accept(f)
-		}
-	}
-	return nil
-}
-
 func (f *formatter) VisitStatementList(stmtList *StatementList) any {
 	if len(stmtList.Stmts) > 0 {
 		stmtList.Stmts[0].Accept(f)
 		for _, stmt := range stmtList.Stmts[1:] {
 			fmt.Fprint(f.out, "\n")
 			stmt.Accept(f)
-		}
-		if stmtList.FinalExpr != nil {
-			stmtList.FinalExpr.Accept(f)
 		}
 		fmt.Fprint(f.out, "\n")
 	}

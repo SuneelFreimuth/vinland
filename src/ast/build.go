@@ -1,9 +1,6 @@
 package ast
 
 import (
-	// "strconv"
-
-	"fmt"
 	"strconv"
 
 	"github.com/SuneelFreimuth/vinland/src/parser"
@@ -28,43 +25,28 @@ func NewBuilder() *Builder {
 
 
 func (b *Builder) VisitProgram(ctx *parser.ProgramContext) any {
-	return ctx.DeclList().Accept(b)
-}
-
-func (b *Builder) VisitDeclList(ctx *parser.DeclListContext) any {
-	declList := make([]Declaration, len(ctx.AllDecl()))
-	for i, decl := range ctx.AllDecl() {
-		declList[i] = decl.Accept(b).(Declaration)
-	}
-	return NewDeclarationList(declList)
-}
-
-func (b *Builder) VisitDecl(ctx *parser.DeclContext) any {
-	if defn := ctx.FunctionDefinition(); defn != nil {
-		return defn.Accept(b)
-	}
-	return nil
-}
-
-func (b *Builder) VisitStmtBlock(ctx *parser.StmtBlockContext) any {
-	b.SymbolTable.Enter()
-	defer b.SymbolTable.Exit()
 	return ctx.StmtList().Accept(b)
 }
 
-func (b *Builder) VisitStmtList(ctx *parser.StmtListContext) any {
-	stmts := make([]StmtExpr, len(ctx.AllStmt()))
-	for i, stmt := range ctx.AllStmt() {
-		stmts[i] = stmt.Accept(b).(Statement)
-	}
+func (b *Builder) VisitBlock(ctx *parser.BlockContext) any {
+	b.SymbolTable.Enter()
+	defer b.SymbolTable.Exit()
+	stmtList := ctx.StmtList().Accept(b).(*StatementList)
 
 	var finalExpr Expression
 	if expr0 := ctx.Expr0(); expr0 != nil {
-		fmt.Println("HAS FINAL EXPRESSION: ", expr0.GetText())
 		finalExpr = expr0.Accept(b).(Expression)
 	}
 
-	return NewStatementList(stmts, finalExpr)
+	return NewBlock(stmtList, finalExpr)
+}
+
+func (b *Builder) VisitStmtList(ctx *parser.StmtListContext) any {
+	stmts := make([]Statement, len(ctx.AllStmt()))
+	for i, stmt := range ctx.AllStmt() {
+		stmts[i] = stmt.Accept(b).(Statement)
+	}
+	return NewStatementList(stmts)
 }
 
 func (b *Builder) VisitStmt(ctx *parser.StmtContext) any {
@@ -74,7 +56,7 @@ func (b *Builder) VisitStmt(ctx *parser.StmtContext) any {
 	if expr := ctx.Expr0(); expr != nil {
 		return expr.Accept(b)
 	}
-	return nil
+	return ctx.FunctionDefinition().Accept(b)
 }
 
 func (b *Builder) VisitBinding(ctx *parser.BindingContext) any {
@@ -96,18 +78,27 @@ func (b *Builder) VisitFunctionDefinition(ctx *parser.FunctionDefinitionContext)
 		paramSymbols[i], _ = b.SymbolTable.Put(param.GetText())
 	}
 
-	body := ctx.StmtBlock().StmtList().Accept(b).(*StatementList)
+	// Avoid creating another new scope since the function's body is a block.
+	stmtList := ctx.Block().StmtList().Accept(b).(*StatementList)
+	var finalExpr Expression
+	if expr0 := ctx.Block().Expr0(); expr0 != nil {
+		finalExpr = expr0.Accept(b).(Expression)
+	}
+	block := NewBlock(stmtList, finalExpr)
 
 	b.SymbolTable.Exit()
 
-	return NewFunctionDefinition(name, paramSymbols, body)
+	return NewFunctionDefinition(name, paramSymbols, block)
 }
 
 func (b *Builder) VisitExpr0(ctx *parser.Expr0Context) any {
 	if expr1 := ctx.Expr1(); expr1 != nil {
 		return expr1.Accept(b)
 	}
-	return ctx.IfExpr().Accept(b)
+	if ifExpr := ctx.IfExpr(); ifExpr != nil {
+		return ifExpr.Accept(b)
+	}
+	return ctx.Block().Accept(b)
 }
 
 func (b *Builder) VisitIfExpr(ctx *parser.IfExprContext) any {
@@ -215,40 +206,3 @@ func (b *Builder) VisitCallExpr(ctx *parser.CallExprContext) any {
 
 	return NewCallExpr(callee, args)
 }
-
-
-// func (b *Builder) VisitParenthesized(ctx *parser.ParenthesizedContext) any {
-// 	return ctx.Expr().Accept(b).(Node)
-// }
-
-// func (b *Builder) VisitMulDiv(ctx *parser.MulDivContext) any {
-// 	left := ctx.Expr(0).Accept(b).(Node)
-// 	op := OpFromString(ctx.GetOp().GetText())
-// 	right := ctx.Expr(1).Accept(b).(Node)
-
-// 	operation := NewOperation(op)
-// 	operation.SetChild(0, left)
-// 	operation.SetChild(1, right)
-
-// 	return operation
-// }
-
-// func (b *Builder) VisitAddSub(ctx *parser.AddSubContext) any {
-// 	left := ctx.Expr(0).Accept(b).(Node)
-// 	op := OpFromString(ctx.GetOp().GetText())
-// 	right := ctx.Expr(1).Accept(b).(Node)
-
-// 	operation := NewOperation(op)
-// 	operation.SetChild(0, left)
-// 	operation.SetChild(1, right)
-
-// 	return operation
-// }
-
-// func (b *Builder) VisitNumber(ctx *parser.NumberContext) any {
-// 	n, err := strconv.ParseFloat(ctx.GetText(), 64)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return NewNumber(float64(n))
-// }

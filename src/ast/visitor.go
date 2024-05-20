@@ -1,8 +1,8 @@
 package ast
 
 type Visitor interface {
-	VisitDeclarationList(*DeclarationList) any
 	VisitStatementList(*StatementList) any
+	VisitBlock(*Block) any
 	VisitBinding(*Binding) any
 	VisitFunctionDefinition(*FunctionDefinition) any
 	VisitCallExpr(*CallExpr) any
@@ -17,11 +17,11 @@ type Visitor interface {
 
 type NullVisitor struct {}
 
-func (v *NullVisitor) VisitDeclarationList(*DeclarationList) any {
+func (v *NullVisitor) VisitStatementList(*StatementList) any {
 	return nil
 }
 
-func (v *NullVisitor) VisitStatementList(*StatementList) any {
+func (v *NullVisitor) VisitBlock(*Block) any {
 	return nil
 }
 

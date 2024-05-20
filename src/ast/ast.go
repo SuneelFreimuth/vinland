@@ -15,21 +15,19 @@ type Node interface {
 	ExitNode(l Listener)
 }
 
-type StmtExpr interface {
-	Node
-}
 
 type Expression interface {
-	StmtExpr
+	Statement
 }
 
 type Statement interface {
-	StmtExpr
+	Node
 }
 
 type Declaration interface {
 	Node
 }
+
 
 type BaseNode struct {
 	Type types.Type
@@ -46,46 +44,48 @@ func (bn *BaseNode) Children() []Node {
 func (bn *BaseNode) EnterNode(l Listener) {}
 func (bn *BaseNode) ExitNode(l Listener)  {}
 
-type DeclarationList struct {
+
+type Block struct {
 	BaseNode
-	Decls []Declaration
+	StatementList *StatementList
+	FinalExpr Expression
 }
 
-func NewDeclarationList(decls []Declaration) *DeclarationList {
-	return &DeclarationList{Decls: decls}
+func NewBlock(stmtList *StatementList, finalExpr Expression) *Block {
+	return &Block{
+		StatementList: stmtList,
+		FinalExpr: finalExpr,
+	}
 }
 
-func (dl *DeclarationList) Accept(v Visitor) any {
-	return v.VisitDeclarationList(dl)
+func (b *Block) Accept(v Visitor) any {
+	return v.VisitBlock(b)
 }
 
-func (dl *DeclarationList) Children() []Node {
-	children := make([]Node, len(dl.Decls))
-	for i, decl := range dl.Decls {
-		children[i] = decl
+func (b *Block) Children() []Node {
+	children := b.StatementList.Children()
+	if b.FinalExpr != nil {
+		return append(children, b.FinalExpr)
 	}
 	return children
 }
 
-func (dl *DeclarationList) EnterNode(l Listener) {
-	l.EnterDeclarationList(dl)
+func (b *Block) EnterNode(l Listener) {
+	l.EnterBlock(b)
 }
 
-func (dl *DeclarationList) ExitNode(l Listener) {
-	l.ExitDeclarationList(dl)
+func (b *Block) ExitNode(l Listener) {
+	l.ExitBlock(b)
 }
+
 
 type StatementList struct {
 	BaseNode
-	Stmts     []StmtExpr
-	FinalExpr Expression
+	Stmts     []Statement
 }
 
-func NewStatementList(stmts []StmtExpr, finalExpr Expression) *StatementList {
-	return &StatementList{
-		Stmts:     stmts,
-		FinalExpr: finalExpr,
-	}
+func NewStatementList(stmts []Statement) *StatementList {
+	return &StatementList{Stmts: stmts}
 }
 
 func (stmts *StatementList) Accept(v Visitor) any {
@@ -96,9 +96,6 @@ func (stmts *StatementList) Children() []Node {
 	children := make([]Node, len(stmts.Stmts))
 	for i, stmt := range stmts.Stmts {
 		children[i] = stmt
-	}
-	if stmts.FinalExpr != nil {
-		children = append(children, stmts.FinalExpr)
 	}
 	return children
 }
@@ -111,17 +108,18 @@ func (sl *StatementList) ExitNode(l Listener) {
 	l.ExitStatementList(sl)
 }
 
+
 type FunctionDefinition struct {
 	BaseNode
 	Name       Symbol
 	Parameters []Symbol
-	Body       *StatementList
+	Body       *Block
 }
 
 func NewFunctionDefinition(
 	function Symbol,
 	parameters []Symbol,
-	body *StatementList,
+	body *Block,
 ) *FunctionDefinition {
 	return &FunctionDefinition{
 		Name:       function,
@@ -145,6 +143,7 @@ func (defn *FunctionDefinition) EnterNode(l Listener) {
 func (defn *FunctionDefinition) ExitNode(l Listener) {
 	l.ExitFunctionDefinition(defn)
 }
+
 
 type Binding struct {
 	BaseNode
@@ -175,6 +174,7 @@ func (b *Binding) ExitNode(l Listener) {
 	l.ExitBinding(b)
 }
 
+
 type LiteralInt struct {
 	BaseNode
 	Value int64
@@ -195,6 +195,7 @@ func (li *LiteralInt) EnterNode(l Listener) {
 func (li *LiteralInt) ExitNode(l Listener) {
 	l.ExitLiteralInt(li)
 }
+
 
 type LiteralFloat struct {
 	BaseNode
@@ -217,6 +218,7 @@ func (lf *LiteralFloat) ExitNode(l Listener) {
 	l.ExitLiteralFloat(lf)
 }
 
+
 type LiteralString struct {
 	BaseNode
 	Value string
@@ -238,6 +240,7 @@ func (ls *LiteralString) ExitNode(l Listener) {
 	l.ExitLiteralString(ls)
 }
 
+
 type LiteralBool struct {
 	BaseNode
 	Value bool
@@ -258,6 +261,7 @@ func (lb *LiteralBool) EnterNode(l Listener) {
 func (lb *LiteralBool) ExitNode(l Listener) {
 	l.ExitLiteralBool(lb)
 }
+
 
 type IfExpression struct {
 	BaseNode
@@ -293,6 +297,7 @@ func (ifExpr *IfExpression) EnterNode(l Listener) {
 func (ifExpr *IfExpression) ExitNode(l Listener) {
 	l.ExitIfExpression(ifExpr)
 }
+
 
 type OpExpr struct {
 	BaseNode
@@ -411,6 +416,7 @@ func (expr *OpExpr) ExitNode(l Listener) {
 	l.ExitOpExpr(expr)
 }
 
+
 type CallExpr struct {
 	BaseNode
 	Callee    Symbol
@@ -443,6 +449,7 @@ func (call *CallExpr) EnterNode(l Listener) {
 func (call *CallExpr) ExitNode(l Listener) {
 	l.ExitCallExpr(call)
 }
+
 
 type NameAccess struct {
 	BaseNode

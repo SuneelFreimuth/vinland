@@ -1,32 +1,30 @@
-DeclarationList {
-  FunctionDefinition(fib, (n)) {
-    IfExpression(
-      OpExpr(<
-        NameAccess(n)
-        LiteralInt(1)
-      )
+FunctionDefinition(fib, (n)) {
+  IfExpression(
+    OpExpr(<
+      NameAccess(n)
       LiteralInt(1)
-      OpExpr(+
-        Call(fib
-          OpExpr(-
-            NameAccess(n)
-            LiteralInt(1)
-          )
-        )
-        Call(fib
-          OpExpr(-
-            NameAccess(n)
-            LiteralInt(2)
-          )
-        )
-      )
     )
-  }
-  FunctionDefinition(main, ()) {
-    Call(print
+    LiteralInt(1)
+    OpExpr(+
       Call(fib
-        LiteralInt(10)
+        OpExpr(-
+          NameAccess(n)
+          LiteralInt(1)
+        )
+      )
+      Call(fib
+        OpExpr(-
+          NameAccess(n)
+          LiteralInt(2)
+        )
       )
     )
-  }
+  )
+}
+FunctionDefinition(main, ()) {
+  Call(print
+    Call(fib
+      LiteralInt(10)
+    )
+  )
 }

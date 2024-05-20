@@ -1,4 +1,2 @@
-DeclarationList {
-  FunctionDefinition(main, ()) {
-  }
+FunctionDefinition(main, ()) {
 }

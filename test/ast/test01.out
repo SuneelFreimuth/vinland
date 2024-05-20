@@ -1,16 +1,14 @@
-DeclarationList {
-  FunctionDefinition(main, ()) {
-    Binding(
-      NameAccess(a)
-      LiteralInt(1)
-    )
-    Binding(
-      NameAccess(b)
-      LiteralInt(2)
-    )
-    Binding(
-      NameAccess(c)
-      LiteralInt(3)
-    )
-  }
+FunctionDefinition(main, ()) {
+  Binding(
+    NameAccess(a)
+    LiteralInt(1)
+  )
+  Binding(
+    NameAccess(b)
+    LiteralInt(2)
+  )
+  Binding(
+    NameAccess(c)
+    LiteralInt(3)
+  )
 }
